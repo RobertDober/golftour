@@ -17,8 +17,7 @@ defmodule GolfPhoenix.Router do
     pipe_through :browser # Use the default browser stack
 
     get "/", PageController, :index
-    resources "/tags", TagController # Other scopes may use custom stacks.
-    resources "/locations", LocationController
+    resources "/resources", ResourceController
   end
 
   # scope "/api", GolfPhoenix do
