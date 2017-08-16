@@ -6,25 +6,32 @@ defmodule GolfPhoenix.ResourceControllerTest do
   @invalid_attrs %{}
 
   describe "index" do
-    test "lists all entries by default", %{conn: conn} do
+    setup create_resources do
       [
         Resource.changeset(%Resource{}, %{name: "Res One", tags: ~w(one res), url: "url1"}),
         Resource.changeset(%Resource{}, %{name: "Res Two", tags: ~w(two res), url: "url2"})
       ] |> Enum.each( &Repo.insert!(&1) )
+      # Result not needed
+      %{}
+    end
+
+    test "lists all entries by default", %{conn: conn} do
       conn = get conn, resource_path(conn, :index)
       assert html_response(conn, 200) =~ "Liste des Ressources"
       assert html_response(conn, 200) =~ "Res One"
-      refute html_response(conn, 200) =~ "Res Three"
     end
 
     test "lists some entries on index with search", %{conn: conn} do 
-      [
-        Resource.changeset(%Resource{}, %{name: "Res One", tags: ~w(one res), url: "url1"}),
-        Resource.changeset(%Resource{}, %{name: "Res Two", tags: ~w(two res), url: "url2"})
-      ] |> Enum.each( &Repo.insert!(&1) )
       conn = get conn, resource_path(conn, :index, %{resource: %{tags: ~s(ONE reS)}})
       assert html_response(conn, 200) =~ "Liste des Ressources"
       assert html_response(conn, 200) =~ "Res One"
+      refute html_response(conn, 200) =~ "Res Two"
+    end
+
+    test "lists no entries on index with to demanding search", %{conn: conn} do 
+      conn = get conn, resource_path(conn, :index, %{resource: %{tags: ~s(ONE reS three)}})
+      assert html_response(conn, 200) =~ "Liste des Ressources"
+      refute html_response(conn, 200) =~ "Res One"
       refute html_response(conn, 200) =~ "Res Two"
     end
   end
