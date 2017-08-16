@@ -1,4 +1,9 @@
-<h2>Listing resources</h2>
+<h2>Liste des Ressources</h2>
+
+<%= form_for @changeset, resource_path(@conn, :index), [method: :get], fn f -> %>
+    <%= text_input  f, :tags %>
+    <%= submit "Search" %>
+<% end %>
 
 <table class="table">
   <thead>
@@ -15,16 +20,16 @@
     <tr>
       <td><%= resource.name %></td>
       <td><%= resource.url %></td>
-      <td><%= resource.tags %></td>
+      <td><%= Enum.join(resource.tags, " ") %></td>
 
       <td class="text-right">
-        <%= link "Show", to: resource_path(@conn, :show, resource), class: "btn btn-default btn-xs" %>
-        <%= link "Edit", to: resource_path(@conn, :edit, resource), class: "btn btn-default btn-xs" %>
-        <%= link "Delete", to: resource_path(@conn, :delete, resource), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
+        <%= link "Montrer", to: resource_path(@conn, :show, resource), class: "btn btn-default btn-xs" %>
+        <%= link "Modifier", to: resource_path(@conn, :edit, resource), class: "btn btn-default btn-xs" %>
+        <%= link "Effacer", to: resource_path(@conn, :delete, resource), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
       </td>
     </tr>
 <% end %>
   </tbody>
 </table>
 
-<%= link "New resource", to: resource_path(@conn, :new) %>
+<%= link "Nouvelle Ressource", to: resource_path(@conn, :new) %>

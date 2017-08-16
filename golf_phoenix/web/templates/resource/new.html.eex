@@ -1,4 +1,4 @@
-<h2>New resource</h2>
+<h2>Nouvelle Resource</h2>
 
 <%= render "form.html", changeset: @changeset,
                         action: resource_path(@conn, :create) %>

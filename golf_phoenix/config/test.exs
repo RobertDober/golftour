@@ -16,4 +16,6 @@ config :golf_phoenix, GolfPhoenix.Repo,
   password: "postgres",
   database: "golf_phoenix_test",
   hostname: "localhost",
-  pool: Ecto.Adapters.SQL.Sandbox
+  pool: Ecto.Adapters.SQL.Sandbox,
+  ownership_timeout: 10 * 60 * 1000 # long timeout so pry sessions don't break
+

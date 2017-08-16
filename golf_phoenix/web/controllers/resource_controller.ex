@@ -1,11 +1,30 @@
 defmodule GolfPhoenix.ResourceController do
   use GolfPhoenix.Web, :controller
+  import Ecto.Query, only: [where: 3]
 
   alias GolfPhoenix.Resource
 
-  def index(conn, _params) do
-    resources = Repo.all(Resource)
-    render(conn, "index.html", resources: resources)
+  def find_resources(params) do 
+    query = 
+    case params["resource"] do 
+      %{"tags" => tags } -> find_query(tags)
+      _                  -> Resource
+    end
+    Repo.all(query)
+  end
+
+  def find_query(tags) do 
+    tags
+      |> String.downcase()
+      |> String.split()
+      |> Enum.reduce( GolfPhoenix.Resource, fn val, q1 -> where(q1, [r], ^val in r.tags) end)
+  end
+  
+
+  def index(conn, params) do
+    resources = find_resources(params)
+    changeset = Resource.changeset(%Resource{})
+    render(conn, "index.html", resources: resources, changeset: changeset)
   end
 
   def new(conn, _params) do
@@ -13,8 +32,24 @@ defmodule GolfPhoenix.ResourceController do
     render(conn, "new.html", changeset: changeset)
   end
 
+
+  defp normalize_tags(tags) do
+    tags
+    |> Enum.flat_map( &normalize_tag/1 )
+    |> Enum.sort()
+  end
+  defp normalize_tag(tag) do 
+    tag 
+    |> String.downcase()
+    |> String.split(" ")
+  end
+
   def create(conn, %{"resource" => resource_params}) do
-    changeset = Resource.changeset(%Resource{}, resource_params)
+    resource_params1 = 
+      resource_params
+      |> Map.put("tags", normalize_tags(resource_params["tags"]))
+
+    changeset = Resource.changeset(%Resource{}, resource_params1)
 
     case Repo.insert(changeset) do
       {:ok, _resource} ->
@@ -40,7 +75,9 @@ defmodule GolfPhoenix.ResourceController do
   def update(conn, %{"id" => id, "resource" => resource_params}) do
     resource_params = Map.put_new(resource_params, "tags", nil)
     resource = Repo.get!(Resource, id)
-    changeset = Resource.changeset(resource, resource_params)
+    resource_params1 = resource_params
+                        |> Map.put("tags", normalize_tags(resource_params["tags"]))
+    changeset = Resource.changeset(resource, resource_params1)
 
     case Repo.update(changeset) do
       {:ok, resource} ->
